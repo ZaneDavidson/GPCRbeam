@@ -8,7 +8,7 @@ license = "MIT"
 packages = [{ include = "gpcrbeam", from = "src" }]
 
 [tool.poetry.dependencies]
-python = ">=3.13,<4.0"
+python = ">=3.13,<3.14"
 typer = { version = ">=0.17.3,<0.18.0", extras = ["all"] }
 rich = ">=14.1.0,<15.0.0"
 poetry-dotenv-plugin = "^0.2.0"
@@ -17,6 +17,10 @@ tqdm = "^4.67.1"
 python-dotenv = "^1.1.1"
 requests = "^2.32.5"
 biopython = "^1.85"
+responses = "^0.25.8"
+torch = "^2.8.0"
+transformers = {extras = ["torch"], version = "^4.57.1"}
+fair-esm = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"

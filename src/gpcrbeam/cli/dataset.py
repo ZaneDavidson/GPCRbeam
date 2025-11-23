@@ -53,6 +53,7 @@ def format_class_callback(
     return ",".join(out)
 
 
+# TODO : simplify commands or add aliases
 @app.command("pull-sequences")
 def handle_pull_sequences(
     out_dir: Annotated[
