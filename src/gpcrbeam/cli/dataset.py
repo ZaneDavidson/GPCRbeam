@@ -24,7 +24,7 @@ def _valid_list() -> str:
 
 @app.callback()
 def format_class_callback(
-    gpcr_classes: str | None = typer.Option(None, "--gpcr-class", hidden=True),
+    gpcr_classes: str | None = typer.Option(None, "--gpcr-classes", "--classes", hidden=True),
 ) -> str | None:
 
     if not gpcr_classes:
@@ -55,12 +55,14 @@ def format_class_callback(
 
 # TODO : simplify commands or add aliases
 @app.command("pull-sequences")
+@app.command("pull-seqs")
 def handle_pull_sequences(
     out_dir: Annotated[
         Path | None,
         typer.Option(
             "--out-dir",
-            help="Set output directory",
+            "--O",
+            help="Change output directory",
         ),
     ] = RAW_DATA_DIR,
     gpcr_classes: Annotated[
@@ -97,6 +99,10 @@ def handle_pull_sequences(
         ),
     ] = 5,
 ) -> None:
+    """
+    Pull GPCR sequences and related metadata from the GPCRdb REST API
+    and save to FASTA and CSV files, respectively.
+    """
 
     if out_dir is None:
         out_dir = Path(RAW_DATA_DIR)

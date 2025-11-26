@@ -9,13 +9,11 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 
-# ----------------------------
-# Public dataclasses
-# ----------------------------
 @dataclass(frozen=True, slots=True)
 class Receptor:
-    """Normalized receptor record from GPCRdb API."""
-
+    #
+    # Normalized receptor record from GPCRdb API
+    #
     entry_name: str
     name: str
     accession: str
@@ -31,7 +29,7 @@ class Receptor:
 
     @property
     def name_text(self) -> str:
-        """Get plain text name without HTML tags."""
+        # HTML stripper
         return (
             self.name.replace("<sub>", "")
             .replace("</sub>", "")
@@ -41,9 +39,9 @@ class Receptor:
 
     @classmethod
     def from_api(cls, d: Mapping[str, Any]) -> Receptor:
-        """
-        Create an instance of a Receptor from API response data.
-        """
+        #
+        # Create an instance of a Receptor from API response
+        #
         return cls(
             entry_name=str(d.get("entry_name", "")),
             name=str(d.get("name", "")),
@@ -61,20 +59,18 @@ class Receptor:
 
 @dataclass(frozen=True)
 class GPCRDBConfig:
-    """
-    Create a configuration instance for the GPCRdb API client.
-    """
-
+    #
+    # Configuration for the GPCRdb API client
+    #
     base_url: str = "https://gpcrdb.org/services"
     timeout: float = 30.0
     max_retries: int = 5
 
 
 class GPCRDBClient:
-    """
-    Create a client instance for interacting with the GPCRdb REST API.
-    """
-
+    #
+    # Client instance for interacting with the GPCRdb REST API
+    #
     def __init__(self, config: GPCRDBConfig | None = None) -> None:
         self.config = config or GPCRDBConfig()
         self.session = requests.Session()
@@ -86,30 +82,24 @@ class GPCRDBClient:
         )
         self.session.mount("https://", HTTPAdapter(max_retries=retry))
 
-    # ------------------------
-    # Low-level GET
-    # ------------------------
     def _get(self, url_endpoint: str, params: dict | None = None) -> requests.Response:
         url = f"{self.config.base_url.rstrip('/')}/{url_endpoint.lstrip('/')}"
         response = self.session.get(url, params=params or {}, timeout=self.config.timeout)
         response.raise_for_status()
         return response
 
-    # ------------------------
-    # API interaction
-    # ------------------------
     def get_receptorlist(self) -> list[Receptor]:
-        """
-        Fetch all receptors from /services/receptorlist/ and return normalized dataclass objects.
-        """
+        #
+        # Fetch all receptors from /services/receptorlist/ and return the dataclass objects
+        #
         resp = self._get("receptorlist/")
         raw = cast(list[Mapping[str, Any]], resp.json())
         return [Receptor.from_api(d) for d in raw]
 
     def get_receptor_payloads(self) -> list[Mapping[str, Any]]:
-        """
-        Fetch raw receptor payloads (un-normalized dicts). Useful if callers want direct JSON.
-        """
+        #
+        # Alternative method for raw JSON payloads
+        #
         resp = self._get("receptorlist/")
         return cast(list[Mapping[str, Any]], resp.json())
 

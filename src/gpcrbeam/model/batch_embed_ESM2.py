@@ -7,6 +7,7 @@ import torch
 from Bio import SeqIO
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 from transformers import (
     AutoModel,
     AutoTokenizer,
@@ -34,7 +35,7 @@ def read_fasta(fasta_path: Path) -> Iterator[FastaEntry]:
 
 
 # ---------------------------
-# Datasets
+# Dataset utilities
 # ---------------------------
 class FastaDataset(Dataset):
     def __init__(self, items: Sequence[FastaEntry]) -> None:
@@ -117,11 +118,11 @@ def _mean_pool_last(
 @dataclass(frozen=True)
 class ESM2EmbeddingConfig:
     model_id: str = "facebook/esm2_t33_650M_UR50D"
-    seq_length: int = 1022  # ESM2 limit for residues
+    seq_length: int = 1022  # ESM2 limit for residues (will just keep hard-coded for now)
     tokens_per_batch: int = 4096
     layer: int = -1  # last hidden layer (can use t33)
     mixed_precision: bool = True
-    num_workers: int = 0
+    num_workers: int = 0  # leave this hard-coded unless I can remove the lambda for collation
 
 
 class ESM2Embedder:
@@ -199,12 +200,17 @@ class ESM2Embedder:
 
         total_batches = len(index_batches)
 
-        # TODO: implement tqdm progress bar
-        for batch_idx, (ids, batch) in enumerate(loader):
+        # check tqdm implementation cuz total_batches might not work the way I think it does
+        for batch_idx, (ids, batch) in tqdm(
+            enumerate(loader),
+            total=total_batches,
+            desc="Embedding progress",
+        ):
             # unwrap singleton batch
             cur_ids = ids[0]
             cur_batch = {k: v[0].to(self.device, non_blocking=True) for k, v in batch.items()}
 
+            # remove or fold into tqdm?
             print(f"Processing batch {batch_idx+1} of {total_batches} (size={len(cur_ids)})")
 
             with torch.autocast(device_type=self.device_type, enabled=use_amp):

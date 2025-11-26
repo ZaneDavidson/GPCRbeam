@@ -20,6 +20,9 @@ class DownloadReport:
 
 
 def pull_gpcr_sequences(
+    #
+    # Handle GPCR sequence and metadata responses from GPCRdb
+    #
     out_dir: Path,
     gpcr_classes: list[str] | None = None,
     overwrite: bool = False,

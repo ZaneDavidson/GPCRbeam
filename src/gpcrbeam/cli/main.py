@@ -1,7 +1,7 @@
 import typer
 
 from .. import __version__
-from . import dataset
+from . import dataset, embed
 
 app = typer.Typer(
     help=(
@@ -12,6 +12,7 @@ app = typer.Typer(
 )
 # Nest dataset creation tools inside main CLI
 app.add_typer(dataset.app, name="dataset")
+app.add_typer(embed.app, name="embed")
 
 
 @app.callback(invoke_without_command=True)
