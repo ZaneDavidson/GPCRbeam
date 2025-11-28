@@ -1,7 +1,7 @@
 import typer
 
 from .. import __version__
-from . import dataset, embed
+from . import dataset, esm_utils
 
 app = typer.Typer(
     help=(
@@ -12,7 +12,7 @@ app = typer.Typer(
 )
 # Nest dataset creation tools inside main CLI
 app.add_typer(dataset.app, name="dataset")
-app.add_typer(embed.app, name="embed")
+app.add_typer(esm_utils.app, name="esm_utils")
 
 
 @app.callback(invoke_without_command=True)
