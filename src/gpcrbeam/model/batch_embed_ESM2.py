@@ -205,13 +205,14 @@ class ESM2Embedder:
             enumerate(loader),
             total=total_batches,
             desc="Embedding progress",
+            position=0,
+            leave=True,
         ):
-            # unwrap singleton batch
-            cur_ids = ids[0]
-            cur_batch = {k: v[0].to(self.device, non_blocking=True) for k, v in batch.items()}
+            # move batch to device without dropping batch dimension
+            cur_batch = {k: v.to(self.device, non_blocking=True) for k, v in batch.items()}
 
             # remove or fold into tqdm?
-            print(f"Processing batch {batch_idx+1} of {total_batches} (size={len(cur_ids)})")
+            print(f"Processing batch {batch_idx+1} of {total_batches} (size={len(ids)})")
 
             with torch.autocast(device_type=self.device_type, enabled=use_amp):
                 out = self.model(**cur_batch)  # out: last_hidden_state, tuple of hidden_states
@@ -227,8 +228,8 @@ class ESM2Embedder:
 
             pooled = _mean_pool_last(
                 last_hidden=token_reps,
-                input_ids=batch["input_ids"],
-                attn_mask=batch["attention_mask"],
+                input_ids=cur_batch["input_ids"],
+                attn_mask=cur_batch["attention_mask"],
                 token_ids=TokenIds(
                     cls_id=self.cls_id,
                     eos_id=self.eos_id,
